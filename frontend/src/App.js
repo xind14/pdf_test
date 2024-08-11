@@ -7,7 +7,7 @@ function App() {
     const [address, setAddress] = useState('');
     const [users, setUsers] = useState([]);
 
-    // Fetch users when the component mounts
+
     useEffect(() => {
         axios.get('http://localhost:8000/api/userinfo/')
             .then(response => setUsers(response.data))
@@ -24,7 +24,7 @@ function App() {
         .then(response => {
             console.log(response.data);
             setUsers([...users, response.data]);
-            setName(''); // Clear form fields after submission
+            setName('');
             setAge('');
             setAddress('');
         })
