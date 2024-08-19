@@ -1,16 +1,29 @@
-# Getting Started with Create React App
+# Simple React with Django to test PDF generation
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a simple react app to test the generation of a PDF using ReportLab
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- User answers questions from a form
+- Option to generate pdf
+- Option to edit form 
+- Edited form changes now shows up in generate pdf
 
-### Frontend
+## Getting Started
 
-`npm start`
+1. Clone repository
 
-### Backend
+2. Open up two terminals one for backend and one for frontend directories. Setup virtual environment in backend
 
-`python manage.py runserver
-`
+3. Install dependencies `pip install -r requirements.txt`for backend
+
+4. Apply Migrations
+
+    - `python manage.py makemigrations`
+    - `python manage.py migrate`
+
+5. Run the Development server: `python manage.py runserver`
+
+6. Run the frontend: `npm start`
+
+
