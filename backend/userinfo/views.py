@@ -28,20 +28,20 @@
 
     # return response
 
-# userinfo/views.py
 from rest_framework import viewsets
 from .models import UserInfo
 from .serializers import UserInfoSerializer
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 
 class UserInfoViewSet(viewsets.ModelViewSet):
     queryset = UserInfo.objects.all()
     serializer_class = UserInfoSerializer
 
 def generate_pdf(request, pk):
-    userinfo = UserInfo.objects.get(pk=pk)
+    userinfo = get_object_or_404(UserInfo, pk=pk)
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="user_{pk}.pdf"'
 
@@ -101,6 +101,7 @@ Vestibulum at cursus metus."""
     p.save()
 
     return response
+
 
 
 
