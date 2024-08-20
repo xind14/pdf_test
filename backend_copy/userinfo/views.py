@@ -62,7 +62,7 @@ def generate_pdf(request, pk):
 
     # Path to the template PDF (update the path as needed)
     template_path = os.path.join(settings.BASE_DIR, 'templates/Legitimation.pdf')
-    output_path = os.path.join(settings.BASE_DIR, f'user_{pk}.pdf')
+    output_path = os.path.join(settings.MEDIA_ROOT, f'user_{pk}.pdf')
 
     # Define replacements
     replacements = {
