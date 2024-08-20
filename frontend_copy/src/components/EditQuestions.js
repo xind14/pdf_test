@@ -47,6 +47,13 @@ function EditQuestions({ onUserUpdate }) {
     // Display a loading message while user data is being fetched
     if (!user) return <div>Loading...</div>;
 
+    // Define the questions to be displayed in the table
+    const questions = {
+        name: 'What is your name?',
+        age: 'What is your age?',
+        address: 'What is your address?'
+    };
+
     return (
         <div style={styles.container}>
             <h2 style={styles.heading}>Edit Questions</h2>
@@ -62,7 +69,7 @@ function EditQuestions({ onUserUpdate }) {
                     {/* Iterate over the fields to display them in the table */}
                     {['name', 'age', 'address'].map(field => (
                         <tr key={field} style={styles.row}>
-                            <td style={styles.cell}>{field.charAt(0).toUpperCase() + field.slice(1)}</td>
+                            <td style={styles.cell}>{questions[field]}</td> {/* Show the full question */}
                             <td style={styles.cell}>
                                 {/* Show either an input form or the current value based on editing state */}
                                 {editingField === field ? (
@@ -94,7 +101,7 @@ function EditQuestions({ onUserUpdate }) {
     );
 }
 
-
+// Styles for the component
 const styles = {
     container: {
         padding: '20px',
