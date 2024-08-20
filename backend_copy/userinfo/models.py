@@ -14,6 +14,6 @@ class UserInfo(models.Model):
     name = models.CharField(max_length=100)
     age = models.IntegerField()
     address = models.TextField()
-    pdf_file = models.FileField(upload_to='user_pdfs/', null=True, blank=True)
+    # pdf_file = models.FileField(upload_to='user_pdfs/', null=True, blank=True)
     def __str__(self):
         return self.name
