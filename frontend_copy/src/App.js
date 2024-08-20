@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import EditUser from './components/EditUser';
-import CarouselForm from './components/CarouselForm'; // Import the CarouselForm component
+import { Route, Routes, Link } from 'react-router-dom';
+import EditQuestions from './components/EditQuestions'; 
+import CarouselForm from './components/CarouselForm'; 
 
 function App() {
     const [users, setUsers] = useState([]);
@@ -54,7 +54,7 @@ function App() {
                         </ul>
                     </>
                 } />
-                <Route path="/edit/:id" element={<EditUser onUserUpdate={handleUserUpdate} />} />
+                <Route path="/edit/:id" element={<EditQuestions onUserUpdate={handleUserUpdate} />} />
             </Routes>
         </div>
     );
