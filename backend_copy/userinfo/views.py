@@ -4,13 +4,17 @@ from rest_framework import viewsets
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from .models import UserInfo
-from .serializers import UserInfoSerializer
+from .models import UserInfo, Question
+from .serializers import UserInfoSerializer, QuestionSerializer
 
 class UserInfoViewSet(viewsets.ModelViewSet):
     # Define the queryset and serializer for the UserInfo model
     queryset = UserInfo.objects.all()
     serializer_class = UserInfoSerializer
+    
+class QuestionViewSet(viewsets.ModelViewSet):
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
 
 def replace_text_in_pdf(template_path, output_path, replacements):
     # Open the PDF template for editing

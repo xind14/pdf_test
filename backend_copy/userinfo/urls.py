@@ -2,10 +2,11 @@
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import UserInfoViewSet, generate_pdf
+from .views import UserInfoViewSet, generate_pdf, QuestionViewSet
 
 router = DefaultRouter()
 router.register(r'userinfo', UserInfoViewSet)
+router.register(r'questions', QuestionViewSet) 
 
 urlpatterns = [
     path('api/', include(router.urls)),
