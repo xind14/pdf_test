@@ -22,13 +22,13 @@ def replace_text_in_pdf(template_path, output_path, replacements):
     
     # Define adjustments for each placeholder if needed
     placeholder_adjustments = {
-        'DadFirst': (5, 18),  # Adjust coordinates for 'DadFirst'
+        'DadFirst': (5, 16),  # Adjust coordinates for 'DadFirst'
         'DadAddress': (-100, 20),  # Adjust coordinates for 'DadAddress'
         # Add more placeholders and their adjustments as needed
     }
     
     # Define the expansion amount for the top of the redaction area
-    top_expansion = 10  # Increase this value to make the redaction area larger at the top
+    top_expansion = 8  # Increase this value to make the redaction area larger at the top
 
     # Iterate through each page in the PDF
     for page_number in range(len(pdf_document)):
@@ -61,6 +61,9 @@ def replace_text_in_pdf(template_path, output_path, replacements):
     # Save the updated PDF to the specified output path
     pdf_document.save(output_path)
     pdf_document.close()
+
+    # Issue: currenly when generate PDF happens it saves to a folder media/user_pdfs. Either encrypt that folder and save into the DB a path to the file (people say this is easier?) or save the pdf itself into DB.
+    # Someone said "When we storing something like a PDF file in SQL Server, I would recommend converting the PDF file into a byte array and then put it into a column that is varbinary(max).Honestly, I think the recommended way of doing this is having the file reside not in the DB, but instead in either local file storage or some storage service like an AWS S3 bucket and have the location be stored in the database instead."
 
 def generate_pdf(request, pk):
     # Retrieve the user information based on the primary key
