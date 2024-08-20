@@ -29,17 +29,20 @@
     # return response
 
 from rest_framework import viewsets
-from .models import UserInfo
-from .serializers import UserInfoSerializer
+from .models import UserInfo, Question
+from .serializers import UserInfoSerializer, QuestionSerializer
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
+
 class UserInfoViewSet(viewsets.ModelViewSet):
     queryset = UserInfo.objects.all()
     serializer_class = UserInfoSerializer
-
+class QuestionViewSet(viewsets.ModelViewSet):
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
 def generate_pdf(request, pk):
     userinfo = get_object_or_404(UserInfo, pk=pk)
     response = HttpResponse(content_type='application/pdf')

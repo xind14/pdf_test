@@ -15,7 +15,7 @@ This is a simple react app to test the generation of a PDF using ReportLab
 
 2. Open up two terminals one for backend and one for frontend directories. Setup virtual environment in backend
 
-3. Install dependencies `pip install -r requirements.txt`for backend
+3. Install dependencies `pip install -r requirements.txt`for backend_copy
 
 4. Apply Migrations
 
@@ -24,6 +24,7 @@ This is a simple react app to test the generation of a PDF using ReportLab
 
 5. Run the Development server: `python manage.py runserver`
 
-6. Run the frontend: `npm start`
+6. Run the frontend_copy: `npm start`
+
 
 
