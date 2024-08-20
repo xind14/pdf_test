@@ -1,5 +1,5 @@
 #!/bin/sh
-'''exec' "/Users/xindeng/Desktop/Personal Projects/pdf-test/backend/.env/bin/python3.12" "$0" "$@"
+'''exec' "/Users/xindeng/Desktop/Personal Projects/pdf-test/backend_copy/.env/bin/python3.12" "$0" "$@"
 ' '''
 # -*- coding: utf-8 -*-
 import re

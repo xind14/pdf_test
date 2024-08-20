@@ -1,77 +1,74 @@
+import os
+import fitz  # PyMuPDF
 from rest_framework import viewsets
-from .models import UserInfo
-from .serializers import UserInfoSerializer
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
+from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from .models import UserInfo
+from .serializers import UserInfoSerializer
 
 class UserInfoViewSet(viewsets.ModelViewSet):
     queryset = UserInfo.objects.all()
     serializer_class = UserInfoSerializer
 
+def replace_text_in_pdf(template_path, output_path, replacements):
+    # Open the PDF template
+    pdf_document = fitz.open(template_path)
+    
+    # Define adjustments for each placeholder if needed
+    placeholder_adjustments = {
+        'DadFirst': (5, 8),  # Adjust as needed
+        'DadAddress': (-100, 15),  # Adjust as needed
+        # Add more placeholders and their adjustments as needed
+    }
+    
+    # Iterate through the pages
+    for page_number in range(len(pdf_document)):
+        page = pdf_document[page_number]
+        
+        # Replace placeholders with user-provided values
+        for placeholder, replacement in replacements.items():
+            text_instances = page.search_for(placeholder)
+            for inst in text_instances:
+                # Redact the placeholder text
+                page.add_redact_annot(inst, fill=(1, 1, 1))  # White out the text
+                page.apply_redactions()
+
+                # Retrieve the adjustments for this placeholder
+                x_adjustment, y_adjustment = placeholder_adjustments.get(placeholder, (0, 0))
+                
+                # Overlay the replacement text exactly at the same coordinates
+                x, y0, x1, y1 = inst 
+                page.insert_text(
+                    (x + x_adjustment, y0 + y_adjustment),
+                    replacement,
+                    fontsize=12,  # Ensure the fontsize matches the original text
+                    color=(0, 0, 0)  # Ensure the color matches the original text
+                )
+
+    # Save the updated PDF
+    pdf_document.save(output_path)
+    pdf_document.close()
+
 def generate_pdf(request, pk):
     userinfo = get_object_or_404(UserInfo, pk=pk)
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'inline; filename="user_{pk}.pdf"'
 
-    # Create a PDF
-    p = canvas.Canvas(response, pagesize=letter)
-    width, height = letter
+    # Path to the template PDF (update the path as needed)
+    template_path = os.path.join(settings.BASE_DIR, 'templates/Legitimation.pdf')
+    output_path = os.path.join(settings.BASE_DIR, f'user_{pk}.pdf')
 
-    # Starting position
-    y_position = height - 100
+    # Define replacements
+    replacements = {
+        'DadFirst': userinfo.name,
+        'DadAddress': userinfo.address,
+        # Add more replacements as needed
+    }
 
-    # Adding static text and placeholders for form fields
-    p.setFont("Helvetica", 12)
-    p.drawString(100, y_position, "This agreement is made between this law firm and")
-    
-    # Position for CLIENT NAME
-    p.acroForm.textfield(name='name', tooltip='Name', x=370, y=y_position - 2, width=150, height=20, value=userinfo.name)
-    y_position -= 20
-    
-    # Continuing text
-    p.drawString(100, y_position, "residing at")
-    
-    # Position for CLIENT ADDRESS
-    p.acroForm.textfield(name='address', tooltip='Address', x=160, y=y_position - 5, width=300, height=20, value=userinfo.address)
-    y_position -= 20
+    # Replace the placeholders in the PDF
+    replace_text_in_pdf(template_path, output_path, replacements)
 
-    # Continuing text
-    p.drawString(100, y_position, "The client,")
-    
-    # Position for CLIENT AGE
-    p.acroForm.textfield(name='age', tooltip='Age', x=160, y=y_position - 5, width=50, height=20, value=str(userinfo.age))
-    p.drawString(210, y_position, ", agrees to the terms and conditions outlined below:")
-
-    # Continue with the rest of the text
-    y_position -= 40
-
-    # Wrapping the lorem ipsum text
-    text = """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc tortor nisl, posuere ut nunc et,
-porta mollis massa. Proin mattis dolor augue, ut vehicula ipsum venenatis vitae. Aliquam non
-interdum velit, eget mattis felis. Etiam pharetra aliquam vulputate. Vestibulum odio tellus, vehicula
-a turpis a, egestas viverra urna. Maecenas leo tellus, rhoncus eget tellus vel, luctus venenatis est.
-Vestibulum at cursus metus."""
-    
-    # Create a text object to handle wrapping
-    text_object = p.beginText(50, y_position)
-    text_object.setFont("Helvetica", 12)
-    text_object.setTextOrigin(50, y_position)
-    text_object.setLeading(14)  # Set line height
-
-    # Split the text into lines and add them to the text object
-    for line in text.split('\n'):
-        text_object.textLines(line)
-    
-    # Draw the text object onto the canvas
-    p.drawText(text_object)
-
-    p.showPage()
-    p.save()
-
-    return response
-
-
-
-
+    # Serve the generated PDF to the user
+    with open(output_path, 'rb') as pdf_file:
+        response = HttpResponse(pdf_file.read(), content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="user_{pk}.pdf"'
+        return response
