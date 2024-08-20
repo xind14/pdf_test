@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import EditUser from './components/EditUser';
+import CarouselForm from './components/CarouselForm'; // Import the CarouselForm component
 
 function App() {
-    const [name, setName] = useState('');
-    const [age, setAge] = useState('');
-    const [address, setAddress] = useState('');
     const [users, setUsers] = useState([]);
 
     useEffect(() => {
@@ -19,18 +17,10 @@ function App() {
             .catch(error => console.error(error));
     };
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        axios.post('http://localhost:8000/api/userinfo/', {
-            name,
-            age,
-            address
-        })
+    const handleSubmit = (userData) => {
+        axios.post('http://localhost:8000/api/userinfo/', userData)
         .then(response => {
             setUsers([...users, response.data]);
-            setName('');
-            setAge('');
-            setAddress('');
         })
         .catch(error => console.error(error));
     };
@@ -48,22 +38,8 @@ function App() {
             <Routes>
                 <Route path="/" element={
                     <>
-                        <form onSubmit={handleSubmit}>
-                            <div>
-                                <label>Name:</label>
-                                <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
-                            </div>
-                            <div>
-                                <label>Age:</label>
-                                <input type="number" value={age} onChange={(e) => setAge(e.target.value)} />
-                            </div>
-                            <div>
-                                <label>Address:</label>
-                                <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} />
-                            </div>
-                            <button type="submit">Submit</button>
-                        </form>
-
+                        <CarouselForm handleSubmit={handleSubmit} /> {/* Use the CarouselForm here */}
+                        
                         <h2>Users</h2>
                         <ul>
                             {users.map(user => (
