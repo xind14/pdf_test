@@ -1,5 +1,5 @@
 import os
-import fitz  # PyMuPDF
+import pymupdf  # PyMuPDF
 from rest_framework import viewsets
 from django.conf import settings
 from django.http import HttpResponse
@@ -13,15 +13,18 @@ class UserInfoViewSet(viewsets.ModelViewSet):
 
 def replace_text_in_pdf(template_path, output_path, replacements):
     # Open the PDF template
-    pdf_document = fitz.open(template_path)
+    pdf_document = pymupdf.open(template_path)
     
     # Define adjustments for each placeholder if needed
     placeholder_adjustments = {
-        'DadFirst': (5, 8),  # Adjust as needed
-        'DadAddress': (-100, 15),  # Adjust as needed
+        'DadFirst': (5, 18),  # Adjust as needed
+        'DadAddress': (-100, 20),  # Adjust as needed
         # Add more placeholders and their adjustments as needed
     }
     
+    # Define the expansion amount for the top of the redaction area
+    top_expansion = 10  # Increase this value to make the top redaction area larger
+
     # Iterate through the pages
     for page_number in range(len(pdf_document)):
         page = pdf_document[page_number]
@@ -30,17 +33,21 @@ def replace_text_in_pdf(template_path, output_path, replacements):
         for placeholder, replacement in replacements.items():
             text_instances = page.search_for(placeholder)
             for inst in text_instances:
+                x0, y0, x1, y1 = inst
+                
+                # Expand the redaction area only at the top
+                y0 -= top_expansion
+                
                 # Redact the placeholder text
-                page.add_redact_annot(inst, fill=(1, 1, 1))  # White out the text
+                page.add_redact_annot([x0, y0, x1, y1], fill=(1, 1, 1))  # White out the text
                 page.apply_redactions()
 
                 # Retrieve the adjustments for this placeholder
                 x_adjustment, y_adjustment = placeholder_adjustments.get(placeholder, (0, 0))
                 
                 # Overlay the replacement text exactly at the same coordinates
-                x, y0, x1, y1 = inst 
                 page.insert_text(
-                    (x + x_adjustment, y0 + y_adjustment),
+                    (x0 + x_adjustment, y0 + y_adjustment),
                     replacement,
                     fontsize=12,  # Ensure the fontsize matches the original text
                     color=(0, 0, 0)  # Ensure the color matches the original text
