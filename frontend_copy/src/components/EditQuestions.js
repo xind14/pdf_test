@@ -3,35 +3,48 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 
 function EditQuestions({ onUserUpdate }) {
+    // Extract the user ID from the URL parameters
     const { id } = useParams();
+    
+    // State to hold the user data fetched from the API
     const [user, setUser] = useState(null);
+    
+    // State to track which field is being edited
     const [editingField, setEditingField] = useState(null);
-    const navigate = useNavigate();
+    
+    // State to temporarily hold the new value for the field being edited
     const [tempValue, setTempValue] = useState('');
+    
+    // Hook to navigate programmatically
+    const navigate = useNavigate();
 
+    // Fetch user data when the component mounts or the user ID changes
     useEffect(() => {
         axios.get(`http://localhost:8000/api/userinfo/${id}/`)
             .then(response => setUser(response.data))
             .catch(error => console.error('Error fetching user:', error));
     }, [id]);
 
+    // Set the field to be edited and its current value
     const handleEdit = (field) => {
         setEditingField(field);
         setTempValue(user[field]);
     };
 
+    // Handle saving the updated value
     const handleSave = (e) => {
         e.preventDefault();
         axios.put(`http://localhost:8000/api/userinfo/${id}/`, { ...user, [editingField]: tempValue })
             .then(response => {
                 setUser(response.data);
                 setEditingField(null);
-                onUserUpdate(response.data); // Update the user in the parent component (App.js)
-                navigate('/');
+                onUserUpdate(response.data); // Notify parent component of the update
+                navigate('/'); // Redirect to home page after saving
             })
             .catch(error => console.error('Error updating user:', error));
     };
 
+    // Display a loading message while user data is being fetched
     if (!user) return <div>Loading...</div>;
 
     return (
@@ -46,10 +59,12 @@ function EditQuestions({ onUserUpdate }) {
                     </tr>
                 </thead>
                 <tbody>
+                    {/* Iterate over the fields to display them in the table */}
                     {['name', 'age', 'address'].map(field => (
                         <tr key={field} style={styles.row}>
                             <td style={styles.cell}>{field.charAt(0).toUpperCase() + field.slice(1)}</td>
                             <td style={styles.cell}>
+                                {/* Show either an input form or the current value based on editing state */}
                                 {editingField === field ? (
                                     <form onSubmit={handleSave} style={styles.form}>
                                         <input
@@ -64,6 +79,7 @@ function EditQuestions({ onUserUpdate }) {
                                 )}
                             </td>
                             <td style={styles.cell}>
+                                {/* Show either Save or Edit button based on editing state */}
                                 {editingField === field ? (
                                     <button onClick={handleSave} style={styles.button}>Save</button>
                                 ) : (
@@ -77,6 +93,7 @@ function EditQuestions({ onUserUpdate }) {
         </div>
     );
 }
+
 
 const styles = {
     container: {
