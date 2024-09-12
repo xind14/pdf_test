@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function CarouselForm({ handleSubmit }) {
@@ -10,6 +10,15 @@ function CarouselForm({ handleSubmit }) {
     const [suffix, setSuffix] = useState('');
     const [age, setAge] = useState('');
     const [address, setAddress] = useState('');
+    const [counties, setCounties] = useState([]);
+    const [selectedCounty, setSelectedCounty] = useState('');
+
+    useEffect(() => {
+        // Fetch counties when the component mounts
+        axios.get('http://localhost:8000/api/counties/')
+            .then(response => setCounties(response.data))
+            .catch(error => console.error('Error fetching counties:', error));
+    }, []);
 
     const steps = [
         {
@@ -82,13 +91,34 @@ function CarouselForm({ handleSubmit }) {
                     />
                 </div>
             )
+        },
+        {
+            label: 'Select (Mom\'s) County of Residence.',
+            input: (
+                <div style={styles.inputGroup}>
+                    <label>County</label>
+                    <select
+                        value={selectedCounty}
+                        onChange={(e) => setSelectedCounty(e.target.value)}
+                        style={styles.input}
+                    >
+                        <option value="">Select a county</option>
+                        {counties.map(county => (
+                            <option key={county.id} value={county.id}>
+                                {county.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )
         }
     ];
 
     const sidebarLabels = [
         'Name',
         'Age',
-        'Address'
+        'Address',
+        'County'
     ];
 
     const goToStep = (stepIndex) => {
@@ -117,19 +147,17 @@ function CarouselForm({ handleSubmit }) {
                 last_name: lastName,
                 suffix: suffix,
                 age: age,
-                address: address
+                address: address,
+                mom_county: selectedCounty
             });
             console.log('Response:', response.data);
         } catch (error) {
             console.error('Error submitting data:', error.response ? error.response.data : error.message);
         }
     };
-    
-    
 
     return (
         <div style={styles.container}>
-            {/* Sidebar with step labels */}
             <div style={styles.sidebar}>
                 <h3>Questions</h3>
                 <ul style={styles.menuList}>
@@ -148,7 +176,6 @@ function CarouselForm({ handleSubmit }) {
                 </ul>
             </div>
 
-            {/* Main form area */}
             <div style={styles.formWrapper}>
                 <form onSubmit={isLastStep ? handleFinalSubmit : (e) => e.preventDefault()} style={styles.form}>
                     <div style={styles.inputGroup}>
@@ -166,7 +193,6 @@ function CarouselForm({ handleSubmit }) {
                     </div>
                 </form>
 
-                {/* Progress bar showing current step */}
                 <div style={styles.progressBar}>
                     {steps.map((_, index) => (
                         <button

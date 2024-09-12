@@ -4,8 +4,12 @@ from rest_framework import viewsets
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from .models import UserInfo, Question
-from .serializers import UserInfoSerializer, QuestionSerializer
+from .models import UserInfo, Question, County
+from .serializers import UserInfoSerializer, QuestionSerializer, CountySerializer
+
+class CountyViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = County.objects.all()
+    serializer_class = CountySerializer
 
 class UserInfoViewSet(viewsets.ModelViewSet):
     # Define the queryset and serializer for the UserInfo model
@@ -27,12 +31,15 @@ def replace_text_in_pdf(template_path, output_path, replacements):
         'DadMiddle': (15, 16),
         'DadLast': (5, 16),
         'DadSuffix': (5, 16),
+        'MomCounty': (15, 16),
+
         
         # Add more placeholders and their adjustments as needed
     }
     
     # Define the expansion amount for the top of the redaction area
     top_expansion = 8  # Increase this value to make the redaction area larger at the top
+    bottom_reduction = -10
 
     # Iterate through each page in the PDF
     for page_number in range(len(pdf_document)):
@@ -46,6 +53,7 @@ def replace_text_in_pdf(template_path, output_path, replacements):
                 
                 # Expand the redaction area only at the top
                 y0 -= top_expansion
+                y1 += bottom_reduction
                 
                 # Redact the placeholder text by adding a white annotation over it
                 page.add_redact_annot([x0, y0, x1, y1], fill=(1, 1, 1))  # White out the text
@@ -73,6 +81,11 @@ def generate_pdf(request, pk):
     # Retrieve the user information based on the primary key
     userinfo = get_object_or_404(UserInfo, pk=pk)
 
+    # Resolve mom_county ID to county name
+    mom_county_name = ""
+    if userinfo.mom_county:
+        mom_county_name = userinfo.mom_county.name  # Directly access the name attribute
+
     # Define the path to the template PDF and the output path for the generated PDF
     template_path = os.path.join(settings.BASE_DIR, 'templates/Legitimation.pdf')
     output_path = os.path.join(settings.MEDIA_ROOT, f'user_{pk}.pdf')
@@ -84,6 +97,7 @@ def generate_pdf(request, pk):
         'DadLast': userinfo.last_name,
         'DadSuffix': userinfo.suffix or '',  # Handle null/empty case
         'DadAddress': userinfo.address,
+        'MomCounty': mom_county_name,  # Ensure this is a string
     }
 
     # Replace placeholders in the PDF and save the updated file
@@ -94,3 +108,5 @@ def generate_pdf(request, pk):
         response = HttpResponse(pdf_file.read(), content_type='application/pdf')
         response['Content-Disposition'] = f'inline; filename="user_{pk}.pdf"'
         return response
+
+
