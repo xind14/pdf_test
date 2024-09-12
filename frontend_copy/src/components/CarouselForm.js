@@ -1,64 +1,131 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 function CarouselForm({ handleSubmit }) {
-    // State to keep track of the current step in the carousel
     const [step, setStep] = useState(0);
-    
-    // States to store form data
-    const [name, setName] = useState('');
+
+    const [firstName, setFirstName] = useState('');
+    const [middleName, setMiddleName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [suffix, setSuffix] = useState('');
     const [age, setAge] = useState('');
     const [address, setAddress] = useState('');
 
-    // Array of form steps, each containing a label and an input element
     const steps = [
         {
-            label: 'What is your name?',   
-            input: <input type="text" value={name} onChange={(e) => setName(e.target.value)} style={styles.input} />
+            label: 'What is your name?',
+            input: (
+                <div style={styles.nameInputContainer}>
+                    <div style={styles.inlineInputGroup}>
+                        <label>First Name</label>
+                        <input
+                            type="text"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            style={styles.input}
+                        />
+                    </div>
+                    <div style={styles.inlineInputGroup}>
+                        <label>Middle Name</label>
+                        <input
+                            type="text"
+                            value={middleName}
+                            onChange={(e) => setMiddleName(e.target.value)}
+                            style={styles.input}
+                        />
+                    </div>
+                    <div style={styles.inlineInputGroup}>
+                        <label>Last Name</label>
+                        <input
+                            type="text"
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            style={styles.input}
+                        />
+                    </div>
+                    <div style={styles.inlineInputGroup}>
+                        <label>Suffix (optional)</label>
+                        <input
+                            type="text"
+                            value={suffix}
+                            onChange={(e) => setSuffix(e.target.value)}
+                            style={styles.input}
+                        />
+                    </div>
+                </div>
+            )
         },
         {
-            label: 'What is your age?',   
-            input: <input type="number" value={age} onChange={(e) => setAge(e.target.value)} style={styles.input} />
+            label: 'What is your age?',
+            input: (
+                <div style={styles.inputGroup}>
+                    <label>Age</label>
+                    <input
+                        type="number"
+                        value={age}
+                        onChange={(e) => setAge(e.target.value)}
+                        style={styles.input}
+                    />
+                </div>
+            )
         },
         {
             label: 'What is your address?',
-            input: <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} style={styles.input} />
+            input: (
+                <div style={styles.inputGroup}>
+                    <label>Address</label>
+                    <input
+                        type="text"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        style={styles.input}
+                    />
+                </div>
+            )
         }
     ];
 
-    // Labels for the sidebar menu
     const sidebarLabels = [
         'Name',
         'Age',
         'Address'
     ];
 
-    // Function to navigate to a specific step
     const goToStep = (stepIndex) => {
         if (stepIndex >= 0 && stepIndex < steps.length) {
             setStep(stepIndex);
         }
     };
 
-    // Function to go to the next step
     const nextStep = () => {
         goToStep(step + 1);
     };
 
-    // Function to go to the previous step
     const prevStep = () => {
         goToStep(step - 1);
     };
 
-    // Check if the current step is the first one
     const isFirstStep = step === 0;
-    // Check if the current step is the last one
     const isLastStep = step === steps.length - 1;
 
-    // Function to handle form submission on the last step
-    const handleFinalSubmit = (e) => {
+    const handleFinalSubmit = async (e) => {
         e.preventDefault();
-        handleSubmit({ name, age, address });
+        try {
+            const response = await axios.post('http://localhost:8000/api/userinfo/', {
+                first_name: firstName,
+                middle_name: middleName,
+                last_name: lastName,
+                suffix: suffix,
+                age: age,
+                address: address
+            });
+            console.log('Response:', response.data);
+        } catch (error) {
+            console.error('Error submitting data:', error.response ? error.response.data : error.message);
+        }
     };
+    
+    
 
     return (
         <div style={styles.container}>
@@ -80,16 +147,15 @@ function CarouselForm({ handleSubmit }) {
                     ))}
                 </ul>
             </div>
+
             {/* Main form area */}
             <div style={styles.formWrapper}>
                 <form onSubmit={isLastStep ? handleFinalSubmit : (e) => e.preventDefault()} style={styles.form}>
-                    {/* Input group with label and input field */}
                     <div style={styles.inputGroup}>
                         <label style={styles.label}>{steps[step].label}</label>
                         {steps[step].input}
                     </div>
 
-                    {/* Navigation buttons */}
                     <div style={styles.buttonGroup}>
                         <button type="button" onClick={prevStep} disabled={isFirstStep} style={styles.button}>Prev</button>
                         {isLastStep ? (
@@ -119,7 +185,6 @@ function CarouselForm({ handleSubmit }) {
         </div>
     );
 }
-
 
 const styles = {
     container: {
@@ -156,28 +221,43 @@ const styles = {
         padding: '20px',
         borderRadius: '8px',
         boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
-        // width: '100%',
-        // maxWidth: '600px',
-        placeContent:'center'
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
     },
     form: {
         display: 'flex',
         flexDirection: 'column',
+        width: '100%',
+        gap: '20px',
         textAlign: 'center',
-        width: '100%', // Make form take full width of the container
-        gap: '20px', // Add space between form elements
+    },
+    nameInputContainer: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        gap: '10px',
+    },
+    inlineInputGroup: {
+        display: 'flex',
+        flexDirection: 'column',
+        flex: '1',
+        minWidth: '100px',
     },
     inputGroup: {
         marginBottom: '20px',
     },
     input: {
-        fontSize:'30px'
+        fontSize: '16px',
+        padding: '8px',
+        borderRadius: '4px',
+        border: '1px solid #ccc',
+        width: '100%',
+        boxSizing: 'border-box',
     },
     label: {
         marginBottom: '8px',
         fontWeight: 'bold',
-        fontSize:'50px',
-        display:'block'
+        fontSize: '24px',
     },
     buttonGroup: {
         display: 'flex',
@@ -190,7 +270,6 @@ const styles = {
         border: 'none',
         borderRadius: '4px',
         cursor: 'pointer',
-        fontSize:'30px'
     },
     progressBar: {
         display: 'flex',
@@ -204,7 +283,6 @@ const styles = {
         border: 'none',
         borderRadius: '50%',
         cursor: 'pointer',
-        fontSize:'20px'
     },
     activeProgressButton: {
         backgroundColor: '#007bff',

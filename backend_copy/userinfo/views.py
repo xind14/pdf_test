@@ -22,8 +22,12 @@ def replace_text_in_pdf(template_path, output_path, replacements):
     
     # Define adjustments for each placeholder if needed
     placeholder_adjustments = {
-        'DadFirst': (5, 16),  # Adjust coordinates for 'DadFirst'
+        'DadFirst': (0, 16),  # Adjust coordinates for 'DadFirst'
         'DadAddress': (-100, 20),  # Adjust coordinates for 'DadAddress'
+        'DadMiddle': (15, 16),
+        'DadLast': (5, 16),
+        'DadSuffix': (5, 16),
+        
         # Add more placeholders and their adjustments as needed
     }
     
@@ -75,9 +79,11 @@ def generate_pdf(request, pk):
 
     # Define the replacements for placeholders in the PDF
     replacements = {
-        'DadFirst': userinfo.name,
+        'DadFirst': userinfo.first_name,
+        'DadMiddle': userinfo.middle_name or '',  # Handle null/empty case
+        'DadLast': userinfo.last_name,
+        'DadSuffix': userinfo.suffix or '',  # Handle null/empty case
         'DadAddress': userinfo.address,
-        # Add more replacements as needed
     }
 
     # Replace placeholders in the PDF and save the updated file

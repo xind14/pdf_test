@@ -56,7 +56,7 @@ function App() {
                             {/* Render list of users */}
                             {users.map(user => (
                                 <li key={user.id}>
-                                    {user.name} - {user.age} - {user.address}
+                                    {user.first_name} {user.middle_name} {user.last_name} {user.suffix} - {user.age} - {user.address}
                                     {/* Button to generate PDF for the user */}
                                     <button onClick={() => handleGeneratePDF(user.id)}>Generate PDF</button>
                                     {/* Link to edit the user information */}
